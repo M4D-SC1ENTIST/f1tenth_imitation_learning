@@ -22,7 +22,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    dataset = Dataset(downsampling_method)
+    dataset = Dataset()
     log = {"expert": {}, "agent": {}}
 
     # TODO: evaluate the expert performance
@@ -68,9 +68,6 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
         # Train the agent
         for _ in range(n_batch_updates_per_iter):
             train_batch = dataset.sample(train_batch_size)
-
-            
-
-            agent.train(train_batch["observs"], train_batch["actions"])
+            agent.train(train_batch["scans"], train_batch["actions"])
 
     agent_utils.make_log(log, "logs/{}.json".format(env_name))

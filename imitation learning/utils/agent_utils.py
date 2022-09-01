@@ -57,6 +57,7 @@ def sample_traj(env, policy, start_pose, max_traj_len, render=False, observation
         if done:
             break
     traj["observs"] = np.vstack(traj["observs"])
+    traj["scans"] = np.vstack(traj["scans"])
     traj["actions"] = np.vstack(traj["actions"])
     return traj
 
