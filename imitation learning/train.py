@@ -7,6 +7,8 @@ import yaml
 from policies.agents.agent_mlp import AgentPolicyMLP
 from policies.experts.expert_waypoint_follower import ExpertWaypointFollower
 
+from dagger import dagger
+
 
 def process_parsed_args():
     arg_parser = argparse.ArgumentParser()
@@ -43,15 +45,11 @@ def initialization(il_config):
 
     # Initialize the agent
     if il_config['policy_type']['agent']['model'] == 'mlp':
-        if il_config['policy_type']['agent']['downsample_method'] == 'simple':
-            agent = AgentPolicyMLP(il_config['policy_type']['agent']['observation_shape'], \
-                                   il_config['policy_type']['agent']['hidden_dim'], \
-                                   2, \
-                                   il_config['policy_type']['agent']['learning_rate'], \
-                                   device)
-        else:
-            # TODO: Implement CNN and ViT-based downsampling
-            pass
+        agent = AgentPolicyMLP(il_config['policy_type']['agent']['observation_shape'], \
+                                il_config['policy_type']['agent']['hidden_dim'], \
+                                2, \
+                                il_config['policy_type']['agent']['learning_rate'], \
+                                device)
     else:
         #TODO: Implement other model (Transformer)
         pass
@@ -65,12 +63,15 @@ def initialization(il_config):
         pass
     
     start_pose = np.array([[map_conf.sx, map_conf.sy, map_conf.stheta]])
-    return seed, agent, expert, env, start_pose
+    observation_gap = int(1080/il_config['policy_type']['agent']['observation_shape'])
+    downsampling_method = il_config['policy_type']['agent']['downsample_method']
+
+    return seed, agent, expert, env, start_pose, observation_gap, downsampling_method
     
 
 def train(agent, expert, env, start_pose):
     if il_algo == 'dagger':
-        pass
+        dagger(seed, agent, expert, env, start_pose, observation_gap, downsampling_method)
     else:
         # TODO: Implement other IL algorithms (BC, HG DAgger, EIL, etc.)
         pass
@@ -87,10 +88,10 @@ if __name__ == '__main__':
     il_config = yaml.load(open(yaml_loc), Loader=yaml.FullLoader)
 
     # Initialize
-    seed, agent, expert, env, start_pose = initialization(il_config)
+    seed, agent, expert, env, start_pose, observation_gap, downsampling_method = initialization(il_config)
 
     # Train
-    train(seed, agent, expert, env, start_pose)
+    train(seed, agent, expert, env, start_pose, observation_gap, downsampling_method)
 
     
     
