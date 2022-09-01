@@ -6,7 +6,7 @@ import utils.agent_utils as agent_utils
 
 from dataset import Dataset
 
-def dagger(seed, agent, expert, env, start_pose, observation_gap, downsampling_method):
+def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method):
     env_name = "F1TENTH"
 
     eval_batch_size = 10
@@ -22,7 +22,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_gap, downsampling_m
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    dataset = Dataset()
+    dataset = Dataset(downsampling_method)
     log = {"expert": {}, "agent": {}}
 
     # TODO: evaluate the expert performance
@@ -32,7 +32,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_gap, downsampling_m
         print("-"*30 + ("\ninitial:" if iter == 0 else "\niter {}:".format(iter)))
 
         # Evaluate the agent's performance
-        mean, stdev = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size)
+        mean, stdev = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method)
         log["agent"][iter] = {"mean reward": mean, "stdev reward": stdev}
         print("agent reward: {} (+/- {})".format(mean, stdev))
 
@@ -68,6 +68,9 @@ def dagger(seed, agent, expert, env, start_pose, observation_gap, downsampling_m
         # Train the agent
         for _ in range(n_batch_updates_per_iter):
             train_batch = dataset.sample(train_batch_size)
+
+            
+
             agent.train(train_batch["observs"], train_batch["actions"])
 
     agent_utils.make_log(log, "logs/{}.json".format(env_name))

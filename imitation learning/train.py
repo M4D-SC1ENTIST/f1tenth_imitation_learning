@@ -63,15 +63,16 @@ def initialization(il_config):
         pass
     
     start_pose = np.array([[map_conf.sx, map_conf.sy, map_conf.stheta]])
-    observation_gap = int(1080/il_config['policy_type']['agent']['observation_shape'])
+    # observation_gap = int(1080/il_config['policy_type']['agent']['observation_shape'])
+    observation_shape = il_config['policy_type']['agent']['observation_shape']
     downsampling_method = il_config['policy_type']['agent']['downsample_method']
 
-    return seed, agent, expert, env, start_pose, observation_gap, downsampling_method
+    return seed, agent, expert, env, start_pose, observation_shape, downsampling_method
     
 
-def train(agent, expert, env, start_pose):
+def train(agent, expert, env, start_pose, observation_shape, downsampling_method):
     if il_algo == 'dagger':
-        dagger(seed, agent, expert, env, start_pose, observation_gap, downsampling_method)
+        dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method)
     else:
         # TODO: Implement other IL algorithms (BC, HG DAgger, EIL, etc.)
         pass
@@ -88,10 +89,10 @@ if __name__ == '__main__':
     il_config = yaml.load(open(yaml_loc), Loader=yaml.FullLoader)
 
     # Initialize
-    seed, agent, expert, env, start_pose, observation_gap, downsampling_method = initialization(il_config)
+    seed, agent, expert, env, start_pose, observation_shape, downsampling_method = initialization(il_config)
 
     # Train
-    train(seed, agent, expert, env, start_pose, observation_gap, downsampling_method)
+    train(seed, agent, expert, env, start_pose, observation_shape, downsampling_method)
 
     
     

@@ -2,7 +2,23 @@ import numpy as np
 from PIL import Image
 import os, json
 
-def sample_traj(env, policy, start_pose, max_traj_len, render=False):
+import downsampling
+
+def downsample_and_extract_lidar(observ, observation_shape, downsampling_method):
+    """Downsamples the lidar data and extracts the relevant features.
+    
+    Args:
+    - observ: the observation dictionary.
+    - downsampling_method: the downsampling method to use.
+    
+    Returns:
+    A (T, N) numpy array containing the downsampled lidar data.
+    """
+    lidar_scan = observ["scans"][0]
+    processed_lidar_scan = downsampling.downsample(lidar_scan, observation_shape, downsampling_method)
+    return processed_lidar_scan
+
+def sample_traj(env, policy, start_pose, max_traj_len, render=False, observation_shape=108, downsampling_method="simple"):
     """Samples a trajectory of at most `max_traj_len` timesteps by executing a policy.
 
     Args:
@@ -21,7 +37,7 @@ def sample_traj(env, policy, start_pose, max_traj_len, render=False):
         arrays containing the RGB pixel values of the rendered image at each timestep.
     """
 
-    traj = {"observs": [], "actions": [], "reward": 0}
+    traj = {"observs": [], "scans": [], "actions": [], "reward": 0}
     if render:
         traj["frames"] = []
     done = False
@@ -30,7 +46,11 @@ def sample_traj(env, policy, start_pose, max_traj_len, render=False):
         if render:
             traj["frames"].append(env.render(mode="rgb_array"))
         traj["observs"].append(observ)
-        action = policy.get_action(observ)
+        
+        scan = downsample_and_extract_lidar(observ, observation_shape, downsampling_method)
+        traj["scans"].append(scan)
+
+        action = policy.get_action(scan)
         observ, reward, done, _ = env.step(action)
         traj["actions"].append(action)
         traj["reward"] += reward
@@ -40,7 +60,7 @@ def sample_traj(env, policy, start_pose, max_traj_len, render=False):
     traj["actions"] = np.vstack(traj["actions"])
     return traj
 
-def sample_trajs(env, policy, start_pose, max_traj_len, n_trajs):
+def sample_trajs(env, policy, start_pose, max_traj_len, n_trajs, observation_shape, downsampling_method):
     """Samples `n_trajs` trajectories by repeatedly calling sample_traj().
     
     Returns:
@@ -51,25 +71,27 @@ def sample_trajs(env, policy, start_pose, max_traj_len, n_trajs):
     - rewards: a (`n_trajs`, ) numpy array containing the total reward obtained throughout
         each trajectory.
     """
-    data = {"observs":[], "actions":[], "rewards":[]}
+    data = {"observs":[], "scans": [], "actions":[], "rewards":[]}
     for _ in range(n_trajs):
-        traj = sample_traj(env, policy, start_pose, max_traj_len)
+        traj = sample_traj(env, policy, start_pose, max_traj_len, observation_shape, downsampling_method)
         data["observs"].append(traj["observs"])
+        data["scans"].append(traj["scans"])
         data["actions"].append(traj["actions"])
         data["rewards"].append(traj["reward"])
     data["observs"] = np.concatenate(data["observs"])
+    data["scans"] = np.concatenate(data["scans"])
     data["actions"] = np.concatenate(data["actions"])
     data["rewards"] = np.array(data["rewards"])
     return data
 
-def eval(env, policy, start_pose, max_traj_len, eval_batch_size):
+def eval(env, policy, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method):
     """Evaluates the performance of a policy over `eval_batch_size` trajectories.
     
     Returns:
     A tuple whose two entries, respectively, are the average and standard deviation of
     the total reward per trajectory.
     """
-    rewards = sample_trajs(env, policy, start_pose, max_traj_len, eval_batch_size)["rewards"]
+    rewards = sample_trajs(env, policy, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method)["rewards"]
     return np.mean(rewards), np.std(rewards)
 
 def make_gif(env, policy, filename, max_traj_len):
@@ -84,3 +106,4 @@ def make_log(log, filename):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w") as f:
         json.dump(log, f)
+

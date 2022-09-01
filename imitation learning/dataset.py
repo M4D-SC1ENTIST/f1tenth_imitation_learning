@@ -1,10 +1,13 @@
 import numpy as np
+import utils.downsampling as downsampling
 
 class Dataset(object):
-    def __init__(self):
+    def __init__(self, downsampling_method):
+        self.downsampling_method = downsampling_method
         self.observs, self.actions = None, None
 
     def add(self, data):
+        # TODO: Extract LiDAR scan and downsample it
         assert data["observs"].shape[0] == data["actions"].shape[0]
         if self.observs is None:
             self.observs = data["observs"]

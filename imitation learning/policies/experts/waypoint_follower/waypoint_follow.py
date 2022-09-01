@@ -250,6 +250,11 @@ def main():
     env.add_render_callback(render_callback)
     
     obs, step_reward, done, info = env.reset(np.array([[conf.sx, conf.sy, conf.stheta]]))
+
+    # print("lidar scan: ", obs['scans'][0])
+    # print("lidar scan shape: ", obs['scans'][0].shape)
+
+    # Start rendering
     env.render()
 
     laptime = 0.0
@@ -259,6 +264,8 @@ def main():
         speed, steer = planner.plan(obs['poses_x'][0], obs['poses_y'][0], obs['poses_theta'][0], work['tlad'], work['vgain'])
         obs, step_reward, done, info = env.step(np.array([[steer, speed]]))
         laptime += step_reward
+        
+        # Update rendering
         env.render(mode='human')
         
     print('Sim elapsed time:', laptime, 'Real elapsed time:', time.time()-start)
