@@ -7,6 +7,8 @@ import yaml
 from policies.agents.agent_mlp import AgentPolicyMLP
 from policies.experts.expert_waypoint_follower import ExpertWaypointFollower
 
+import utils.env_utils as env_utils
+
 from dagger import dagger
 
 
@@ -35,6 +37,7 @@ def initialization(il_config):
                 map_conf_dict = yaml.load(file, Loader=yaml.FullLoader)
         map_conf = argparse.Namespace(**map_conf_dict)
         env = gym.make('f110_gym:f110-v0', map=map_conf.map_path, map_ext=map_conf.map_ext, num_agents=1)
+        env.add_render_callback(env_utils.render_callback)
     else:
         # TODO: If random generation is on, generate random environment
         pass

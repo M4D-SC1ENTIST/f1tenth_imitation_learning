@@ -1,3 +1,4 @@
+import gym
 import numpy as np
 from PIL import Image
 import os, json
@@ -42,6 +43,10 @@ def sample_traj(env, policy, start_pose, max_traj_len, render=False, observation
         traj["frames"] = []
     done = False
     observ = env.reset(start_pose)
+
+    # Start rendering
+    env.render()
+
     for _ in range(max_traj_len):
         if render:
             traj["frames"].append(env.render(mode="rgb_array"))
@@ -52,6 +57,10 @@ def sample_traj(env, policy, start_pose, max_traj_len, render=False, observation
 
         action = policy.get_action(scan)
         observ, reward, done, _ = env.step(action)
+
+        # Update rendering
+        env.render(mode='human')
+
         traj["actions"].append(action)
         traj["reward"] += reward
         if done:

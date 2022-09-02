@@ -3,11 +3,13 @@ import torch
 import numpy as np
 
 import utils.agent_utils as agent_utils
+import utils.expert_utils as expert_utils
+import utils.env_utils as env_utils
 
 from dataset import Dataset
 
 def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method):
-    env_name = "F1TENTH"
+    algo_name = "DAgger"
 
     eval_batch_size = 10
 
@@ -57,6 +59,8 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
         expert_speed, expert_steer = expert.plan(curr_pose_x, curr_pose_y, curr_pose_theta, tlad, vgain)
         expert_action = np.array([[expert_steer, expert_speed]])
 
+        # TODO: display expert demonstration
+
         # Replace original action with expert labeled action
         data["actions"] = expert_action
 
@@ -68,4 +72,4 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             train_batch = dataset.sample(train_batch_size)
             agent.train(train_batch["scans"], train_batch["actions"])
 
-    agent_utils.make_log(log, "logs/{}.json".format(env_name))
+    agent_utils.make_log(log, "logs/{}.json".format(algo_name))
