@@ -20,8 +20,6 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     dataset = Dataset()
     log = {"expert": {}, "agent": {}}
 
