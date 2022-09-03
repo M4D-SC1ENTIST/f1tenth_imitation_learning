@@ -15,11 +15,12 @@ def downsample_and_extract_lidar(observ, observation_shape, downsampling_method)
     Returns:
     A (T, N) numpy array containing the downsampled lidar data.
     """
+    # print("observ: ", observ)
     lidar_scan = observ["scans"][0]
     processed_lidar_scan = downsampling.downsample(lidar_scan, observation_shape, downsampling_method)
     return processed_lidar_scan
 
-def sample_traj(env, policy, start_pose, max_traj_len, render=False, observation_shape=108, downsampling_method="simple"):
+def sample_traj(env, policy, start_pose, max_traj_len, observation_shape=108, downsampling_method="simple", render=False):
     """Samples a trajectory of at most `max_traj_len` timesteps by executing a policy.
 
     Args:
@@ -42,21 +43,24 @@ def sample_traj(env, policy, start_pose, max_traj_len, render=False, observation
     if render:
         traj["frames"] = []
     done = False
-    observ = env.reset(start_pose)
+    observ, step_reward, done, info = env.reset(start_pose)
 
     # Start rendering
     env.render()
 
     for _ in range(max_traj_len):
         if render:
-            traj["frames"].append(env.render(mode="rgb_array"))
+            traj["frames"].append(env.render(mode='human'))
         traj["observs"].append(observ)
         
         scan = downsample_and_extract_lidar(observ, observation_shape, downsampling_method)
         traj["scans"].append(scan)
 
         action = policy.get_action(scan)
-        observ, reward, done, _ = env.step(action)
+        # TODO: for multi-agent the dimension expansion need to be changed
+        action_expand = np.expand_dims(action, axis=0)
+        # print("action_expand shape: ", action_expand.shape)
+        observ, reward, done, _ = env.step(action_expand)
 
         # Update rendering
         env.render(mode='human')
