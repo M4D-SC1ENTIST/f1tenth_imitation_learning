@@ -11,7 +11,7 @@ from dataset import Dataset
 def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method):
     algo_name = "DAgger"
 
-    eval_batch_size = 10
+    eval_batch_size = 1
 
     max_traj_len = 1000
     n_batch_updates_per_iter = 1000
@@ -43,26 +43,30 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             break
 
         # Sample a trajectory with the agent and re-lable actions with the expert
-        data = agent_utils.sample_traj(env, agent, max_traj_len)
+        data = agent_utils.sample_traj(env, agent, start_pose, max_traj_len, observation_shape, downsampling_method)
         
-        # Extract necessary input information from observation in the sampled trajectory
-        curr_obs = data["observs"]
-        curr_pose_x = curr_obs['poses_x'][0]
-        curr_pose_y = curr_obs['poses_y'][0]
-        curr_pose_theta = curr_obs['poses_theta'][0]
-
         # tlad and vgain are fixed value for the vehicle dynamics model
         tlad = 0.82461887897713965
         vgain = 0.90338203837889
 
+        # Extract necessary input information from observation in the sampled trajectory
+        poses_x = data['poses_x']
+        poses_y = data['poses_y']
+        poses_theta = data['poses_theta']
+
         # Get expert speed and steer and concat into expert action
-        expert_speed, expert_steer = expert.plan(curr_pose_x, curr_pose_y, curr_pose_theta, tlad, vgain)
-        expert_action = np.array([[expert_steer, expert_speed]])
+        for idx in range(data['actions'].shape[0]):
+            curr_poses_x = poses_x[idx][0]
+            curr_poses_y = poses_y[idx][0]
+            curr_poses_theta = poses_theta[idx][0]
+
+            curr_expert_speed, curr_expert_steer = expert.plan(curr_poses_x, curr_poses_y, curr_poses_theta, tlad, vgain)
+            curr_expert_action = np.array([[curr_expert_speed, curr_expert_steer]])
+            # Replace original action with expert labeled action
+            data["actions"][idx] = curr_expert_action
 
         # TODO: display expert demonstration
 
-        # Replace original action with expert labeled action
-        data["actions"] = expert_action
 
         # Aggregate the datasets
         dataset.add(data)

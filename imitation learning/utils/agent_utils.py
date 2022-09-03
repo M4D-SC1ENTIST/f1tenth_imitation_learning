@@ -39,7 +39,7 @@ def sample_traj(env, policy, start_pose, max_traj_len, observation_shape=108, do
         arrays containing the RGB pixel values of the rendered image at each timestep.
     """
 
-    traj = {"observs": [], "scans": [], "actions": [], "reward": 0}
+    traj = {"observs": [], "poses_x": [], "poses_y": [], "poses_theta": [], "scans": [], "actions": [], "reward": 0}
     if render:
         traj["frames"] = []
     done = False
@@ -56,7 +56,12 @@ def sample_traj(env, policy, start_pose, max_traj_len, observation_shape=108, do
         scan = downsample_and_extract_lidar(observ, observation_shape, downsampling_method)
         traj["scans"].append(scan)
 
+        traj["poses_x"].append(observ["poses_x"][0])
+        traj["poses_y"].append(observ["poses_y"][0])
+        traj["poses_theta"].append(observ["poses_theta"][0])
+
         action = policy.get_action(scan)
+
         # TODO: for multi-agent the dimension expansion need to be changed
         action_expand = np.expand_dims(action, axis=0)
         # print("action_expand shape: ", action_expand.shape)
@@ -70,6 +75,9 @@ def sample_traj(env, policy, start_pose, max_traj_len, observation_shape=108, do
         if done:
             break
     traj["observs"] = np.vstack(traj["observs"])
+    traj["poses_x"] = np.vstack(traj["poses_x"])
+    traj["poses_y"] = np.vstack(traj["poses_y"])
+    traj["poses_theta"] = np.vstack(traj["poses_theta"])
     traj["scans"] = np.vstack(traj["scans"])
     traj["actions"] = np.vstack(traj["actions"])
     return traj
@@ -85,14 +93,20 @@ def sample_trajs(env, policy, start_pose, max_traj_len, n_trajs, observation_sha
     - rewards: a (`n_trajs`, ) numpy array containing the total reward obtained throughout
         each trajectory.
     """
-    data = {"observs":[], "scans": [], "actions":[], "rewards":[]}
+    data = {"observs":[], "poses_x": [], "poses_y": [], "poses_theta": [], "scans": [], "actions":[], "rewards":[]}
     for _ in range(n_trajs):
         traj = sample_traj(env, policy, start_pose, max_traj_len, observation_shape, downsampling_method)
         data["observs"].append(traj["observs"])
+        data["poses_x"].append(traj["poses_x"])
+        data["poses_y"].append(traj["poses_y"])
+        data["poses_theta"].append(traj["poses_theta"])
         data["scans"].append(traj["scans"])
         data["actions"].append(traj["actions"])
         data["rewards"].append(traj["reward"])
     data["observs"] = np.concatenate(data["observs"])
+    data["poses_x"] = np.concatenate(data["poses_x"])
+    data["poses_y"] = np.concatenate(data["poses_y"])
+    data["poses_theta"] = np.concatenate(data["poses_theta"])
     data["scans"] = np.concatenate(data["scans"])
     data["actions"] = np.concatenate(data["actions"])
     data["rewards"] = np.array(data["rewards"])
