@@ -49,7 +49,23 @@ Navigate to the examples folder
 cd examples
 ```
 
-Execute the script
+Execute the example script
 ```bash
 python3 waypoint_follow.py
+```
+
+### Training
+Navigate to the imitation learning folder
+```bash
+cd "imitation learning"
+```
+
+Execute the training script
+```bash
+python3 train.py --algorithm=<algorithm name> --training_config=<yaml file location>
+```
+
+Here is an example:
+```bash
+python3 train.py --algorithm=dagger --training_config=il_config.yaml
 ```
