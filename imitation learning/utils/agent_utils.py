@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 from PIL import Image
-import os, json
+import os, json 
 
 from . import downsampling
 
@@ -49,8 +49,8 @@ def sample_traj(env, policy, start_pose, max_traj_len, observation_shape=108, do
     if env.renderer is None:
         env.render()
 
-
     for _ in range(max_traj_len):
+
         if render:
             traj["frames"].append(env.render(mode='human'))
         traj["observs"].append(observ)

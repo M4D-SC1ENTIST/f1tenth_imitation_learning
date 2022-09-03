@@ -65,9 +65,6 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             # Replace original action with expert labeled action
             data["actions"][idx] = curr_expert_action
 
-            # TODO: display expert demonstration
-            env.step(np.array([[curr_expert_steer, curr_expert_speed]]))
-
 
         # Aggregate the datasets
         dataset.add(data)
