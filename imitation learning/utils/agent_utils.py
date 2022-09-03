@@ -46,7 +46,9 @@ def sample_traj(env, policy, start_pose, max_traj_len, observation_shape=108, do
     observ, step_reward, done, info = env.reset(start_pose)
 
     # Start rendering
-    env.render()
+    if env.renderer is None:
+        env.render()
+
 
     for _ in range(max_traj_len):
         if render:
@@ -80,6 +82,7 @@ def sample_traj(env, policy, start_pose, max_traj_len, observation_shape=108, do
     traj["poses_theta"] = np.vstack(traj["poses_theta"])
     traj["scans"] = np.vstack(traj["scans"])
     traj["actions"] = np.vstack(traj["actions"])
+    
     return traj
 
 def sample_trajs(env, policy, start_pose, max_traj_len, n_trajs, observation_shape, downsampling_method):

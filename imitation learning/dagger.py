@@ -61,11 +61,12 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             curr_poses_theta = poses_theta[idx][0]
 
             curr_expert_speed, curr_expert_steer = expert.plan(curr_poses_x, curr_poses_y, curr_poses_theta, tlad, vgain)
-            curr_expert_action = np.array([[curr_expert_speed, curr_expert_steer]])
+            curr_expert_action = np.array([[curr_expert_steer, curr_expert_speed]])
             # Replace original action with expert labeled action
             data["actions"][idx] = curr_expert_action
 
-        # TODO: display expert demonstration
+            # TODO: display expert demonstration
+            env.step(np.array([[curr_expert_steer, curr_expert_speed]]))
 
 
         # Aggregate the datasets
