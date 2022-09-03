@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import os, json
 
-import downsampling
+from . import downsampling
 
 def downsample_and_extract_lidar(observ, observation_shape, downsampling_method):
     """Downsamples the lidar data and extracts the relevant features.

@@ -26,10 +26,12 @@ def initialization(il_config):
 
 
     # Initialize the environment
+    map_conf = None
+
     if il_config['environment']['random_generation'] == False:
         if il_config['environment']['map_config_location'] == None:
             # If no environment is specified but random generation is off, use the default gym environment
-            with open('il/policies/experts/waypoint_follower/config_example_map.yaml') as file:
+            with open('map/example_map/config_example_map.yaml') as file:
                 map_conf_dict = yaml.load(file, Loader=yaml.FullLoader)
         else:
             # If an environment is specified and random generation is off, use the specified environment
@@ -60,7 +62,7 @@ def initialization(il_config):
 
     # Initialize the expert
     if il_config['policy_type']['expert']['behavior']  == 'waypoint_follower':
-        expert = ExpertWaypointFollower()
+        expert = ExpertWaypointFollower(map_conf)
     else:
         # TODO: Implement other expert behavior (Lane switcher and hybrid)
         pass
@@ -73,7 +75,7 @@ def initialization(il_config):
     return seed, agent, expert, env, start_pose, observation_shape, downsampling_method
     
 
-def train(agent, expert, env, start_pose, observation_shape, downsampling_method):
+def train(seed, agent, expert, env, start_pose, observation_shape, downsampling_method):
     if il_algo == 'dagger':
         dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method)
     else:
