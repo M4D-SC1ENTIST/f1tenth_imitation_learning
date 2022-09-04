@@ -10,6 +10,7 @@ from policies.experts.expert_waypoint_follower import ExpertWaypointFollower
 import utils.env_utils as env_utils
 
 from dagger import dagger
+from hg_dagger import hg_dagger
 
 
 def process_parsed_args():

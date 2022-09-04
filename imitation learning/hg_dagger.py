@@ -8,8 +8,8 @@ import utils.env_utils as env_utils
 
 from dataset import Dataset
 
-def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
-    algo_name = "DAgger"
+def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
+    algo_name = "HG-DAgger"
     best_model = agent
 
     num_of_expert_queries = 0
