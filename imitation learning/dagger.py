@@ -50,8 +50,10 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             print("Evaluating agent...")
             print("- "*15)
             log["Iteration"].append(iter)
-            mean_reward, stdev_reward = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method, render, render_mode)
+            mean_travelled_distances, stdev_travelled_distances, mean_reward, stdev_reward = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method, render, render_mode)
             
+            log['Mean Distance Travelled'].append(mean_travelled_distances)
+            log['STDEV Distance Travelled'].append(stdev_travelled_distances)
             log['Mean Reward'].append(mean_reward)
             log['STDEV Reward'].append(stdev_reward)
 
