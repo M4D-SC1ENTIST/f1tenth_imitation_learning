@@ -10,6 +10,7 @@ from dataset import Dataset
 
 def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
     algo_name = "DAgger"
+    best_model = agent
 
     num_of_expert_queries = 0
 
@@ -56,6 +57,11 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             log['STDEV Distance Travelled'].append(stdev_travelled_distances)
             log['Mean Reward'].append(mean_reward)
             log['STDEV Reward'].append(stdev_reward)
+            
+            # Replace the best model if the current model is better
+            if  len(log['Mean Distance Travelled']) >= 2:
+                if log['Mean Distance Travelled'][-1] > log['Mean Distance Travelled'][-2]:
+                    best_model = agent
 
             print("Number of Samples: {}".format(log['Number of Samples'][-1]))
             print("Number of Expert Queries: {}".format(log['Number of Expert Queries'][-1]))
@@ -116,5 +122,5 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             train_batch = dataset.sample(train_batch_size)
             agent.train(train_batch["scans"], train_batch["actions"])
 
-    # Save log and model
-    agent_utils.save_log_and_model(log, agent, algo_name)
+    # Save log and the best model
+    agent_utils.save_log_and_model(log, best_model, algo_name)
