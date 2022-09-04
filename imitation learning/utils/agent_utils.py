@@ -1,5 +1,7 @@
 import gym
+import torch
 import numpy as np
+import pandas as pd
 from PIL import Image
 import os, json 
 
@@ -99,4 +101,16 @@ def make_log(log, filename):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w") as f:
         json.dump(log, f)
+
+
+def save_log_and_model(log, agent, algo_name):
+    path = "logs/{}".format(algo_name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    # Save log
+    df = pd.DataFrame(log)
+    df.to_csv(path + f'/{algo_name}_log.csv', index=False)
+
+    # Save model
+    torch.save(agent.state_dict(), path + f'/{algo_name}_model.pkl')
 

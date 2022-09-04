@@ -13,7 +13,7 @@ policy_type:
     observation_shape: 108
     # TODO: downsample option for CNN and ViT
     model: mlp
-    hidden_dim: 64
+    hidden_dim: 128
     learning_rate: 0.001
   # TODO: YAML config for Transformer 
   expert:

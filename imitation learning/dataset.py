@@ -35,3 +35,6 @@ class Dataset(object):
     def sample(self, batch_size):
         idx = np.random.permutation(self.scans.shape[0])[:batch_size]
         return {"scans":self.scans[idx], "actions":self.actions[idx]}
+    
+    def get_num_of_total_samples(self):
+        return self.scans.shape[0]

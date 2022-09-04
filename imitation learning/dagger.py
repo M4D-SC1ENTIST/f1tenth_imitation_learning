@@ -11,16 +11,19 @@ from dataset import Dataset
 def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
     algo_name = "DAgger"
 
+    num_of_expert_queries = 0
+
     if render:
         eval_batch_size = 1
     else:
         eval_batch_size = 10
 
+    init_traj_len = 50
     max_traj_len = 10000
     n_batch_updates_per_iter = 1000
-    n_iter = 300
+    n_iter = 10
 
-    train_batch_size = 256
+    train_batch_size = 64
 
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -28,25 +31,50 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
     dataset = Dataset()
 
     # TODO: modify the log
-    log = {"agent": {}}
+    log = {'Iteration': [],
+           'Number of Samples': [], 
+           'Number of Expert Queries': [], 
+           'Mean Distance Travelled': [],
+           'STDEV Distance Travelled': [],
+           'Mean Reward': [],
+           'STDEV Reward': []}
 
     # Perform num_iter iterations of DAgger
     for iter in range(n_iter + 1):
         print("-"*30 + ("\ninitial:" if iter == 0 else "\niter {}:".format(iter)))
 
-        # Evaluate the agent's performance
-        print("Evaluating agent...")
-        mean, stdev = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method, render, render_mode)
-        log["agent"][iter] = {"mean reward": mean, "stdev reward": stdev}
-        print("agent reward: {} (+/- {})".format(mean, stdev))
 
+        # Evaluate the agent's performance
+        # No evaluation at the initial iteration
+        if iter > 0:
+            print("Evaluating agent...")
+            print("- "*15)
+            log["Iteration"].append(iter)
+            mean_reward, stdev_reward = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method, render, render_mode)
+            
+            log['Mean Reward'].append(mean_reward)
+            log['STDEV Reward'].append(stdev_reward)
+
+            print("Number of Samples: {}".format(log['Number of Samples'][-1]))
+            print("Number of Expert Queries: {}".format(log['Number of Expert Queries'][-1]))
+            print("Distance Travelled: {} (+/- {})".format(log['Mean Distance Travelled'][-1], log['STDEV Distance Travelled'][-1]))
+            print("Reward: {} (+/- {})".format(log['Mean Reward'][-1], log['STDEV Reward'][-1]))
+
+            print("- "*15)
         if iter == n_iter:
             break
 
+
         # Sample a trajectory with the agent and re-lable actions with the expert
         print("Sampling trajectory...")
-        data = agent_utils.sample_traj(env, agent, start_pose, max_traj_len, observation_shape, downsampling_method, render, render_mode)
-        
+
+        # Disable render for the initial iteration as it takes too much time
+        # The max trajectory length is also different in the initial iteration
+        if iter == 0:
+            data = agent_utils.sample_traj(env, agent, start_pose, init_traj_len, observation_shape, downsampling_method, render=False, render_mode=None)
+        else:
+            data = agent_utils.sample_traj(env, agent, start_pose, max_traj_len, observation_shape, downsampling_method, render, render_mode)
+
         # tlad and vgain are fixed value for the vehicle dynamics model
         tlad = 0.82461887897713965
         vgain = 0.90338203837889
@@ -55,6 +83,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
         poses_x = data['poses_x']
         poses_y = data['poses_y']
         poses_theta = data['poses_theta']
+
 
         # Get expert speed and steer and concat into expert action
         print("Expert labeling...")
@@ -68,10 +97,16 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             # Replace original action with expert labeled action
             data["actions"][idx] = curr_expert_action
 
+            num_of_expert_queries += 1
+
 
         # Aggregate the datasets
         print("Aggregating dataset...")
         dataset.add(data)
+
+        log['Number of Samples'].append(dataset.get_num_of_total_samples())
+        log['Number of Expert Queries'].append(num_of_expert_queries)
+
 
         # Train the agent
         print("Training agent...")
@@ -79,4 +114,5 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             train_batch = dataset.sample(train_batch_size)
             agent.train(train_batch["scans"], train_batch["actions"])
 
-    agent_utils.make_log(log, "logs/{}.json".format(algo_name))
+    # Save log and model
+    agent_utils.save_log_and_model(log, agent, algo_name)
