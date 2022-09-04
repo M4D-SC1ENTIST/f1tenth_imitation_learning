@@ -28,7 +28,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
     dataset = Dataset()
 
     # TODO: modify the log
-    log = {"expert": {}, "agent": {}}
+    log = {"agent": {}}
 
     # Perform num_iter iterations of DAgger
     for iter in range(n_iter + 1):
