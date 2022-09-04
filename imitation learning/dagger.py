@@ -11,7 +11,10 @@ from dataset import Dataset
 def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
     algo_name = "DAgger"
 
-    eval_batch_size = 1
+    if render:
+        eval_batch_size = 1
+    else:
+        eval_batch_size = 10
 
     max_traj_len = 10000
     n_batch_updates_per_iter = 1000
