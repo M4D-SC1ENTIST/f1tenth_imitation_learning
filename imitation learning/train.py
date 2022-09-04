@@ -72,12 +72,15 @@ def initialization(il_config):
     observation_shape = il_config['policy_type']['agent']['observation_shape']
     downsampling_method = il_config['policy_type']['agent']['downsample_method']
 
-    return seed, agent, expert, env, start_pose, observation_shape, downsampling_method
+    render = il_config['environment']['render']
+    render_mode = il_config['environment']['render_mode']
+
+    return seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode
     
 
-def train(seed, agent, expert, env, start_pose, observation_shape, downsampling_method):
+def train(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
     if il_algo == 'dagger':
-        dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method)
+        dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode)
     else:
         # TODO: Implement other IL algorithms (BC, HG DAgger, EIL, etc.)
         pass
@@ -94,10 +97,10 @@ if __name__ == '__main__':
     il_config = yaml.load(open(yaml_loc), Loader=yaml.FullLoader)
 
     # Initialize
-    seed, agent, expert, env, start_pose, observation_shape, downsampling_method = initialization(il_config)
+    seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode = initialization(il_config)
 
     # Train
-    train(seed, agent, expert, env, start_pose, observation_shape, downsampling_method)
+    train(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode)
 
     
     

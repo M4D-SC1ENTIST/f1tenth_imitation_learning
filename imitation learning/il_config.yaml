@@ -3,7 +3,9 @@ random_seed: 0
 environment:
   # Example map will be loaded if map_config_location is empty while random_generation is false
   random_generation: false
-  map_config_location: 
+  map_config_location:
+  render: true
+  render_mode: human_fast # human or human_fast
 # Agent and expert policies
 policy_type:
   agent: 

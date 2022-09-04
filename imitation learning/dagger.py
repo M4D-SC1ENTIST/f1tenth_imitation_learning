@@ -8,42 +8,41 @@ import utils.env_utils as env_utils
 
 from dataset import Dataset
 
-def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method):
+def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
     algo_name = "DAgger"
 
     eval_batch_size = 1
 
-    max_traj_len = 1000
+    max_traj_len = 10000
     n_batch_updates_per_iter = 1000
-    n_iter = 20
+    n_iter = 300
 
-    train_batch_size = 64
+    train_batch_size = 256
 
     np.random.seed(seed)
     torch.manual_seed(seed)
 
     dataset = Dataset()
-    log = {"expert": {}, "agent": {}}
 
-    # TODO: evaluate the expert performance
+    # TODO: modify the log
+    log = {"expert": {}, "agent": {}}
 
     # Perform num_iter iterations of DAgger
     for iter in range(n_iter + 1):
         print("-"*30 + ("\ninitial:" if iter == 0 else "\niter {}:".format(iter)))
 
         # Evaluate the agent's performance
-        mean, stdev = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method)
+        print("Evaluating agent...")
+        mean, stdev = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method, render, render_mode)
         log["agent"][iter] = {"mean reward": mean, "stdev reward": stdev}
         print("agent reward: {} (+/- {})".format(mean, stdev))
 
-        # TODO: change rendering for adapting F1TENTH environment
-        # if iter % make_gif_every == 0:
-            # utils.make_gif(env, agent, "videos/{}/iter_{}.gif".format(env_name, iter), 150)
         if iter == n_iter:
             break
 
         # Sample a trajectory with the agent and re-lable actions with the expert
-        data = agent_utils.sample_traj(env, agent, start_pose, max_traj_len, observation_shape, downsampling_method)
+        print("Sampling trajectory...")
+        data = agent_utils.sample_traj(env, agent, start_pose, max_traj_len, observation_shape, downsampling_method, render, render_mode)
         
         # tlad and vgain are fixed value for the vehicle dynamics model
         tlad = 0.82461887897713965
@@ -55,6 +54,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
         poses_theta = data['poses_theta']
 
         # Get expert speed and steer and concat into expert action
+        print("Expert labeling...")
         for idx in range(data['actions'].shape[0]):
             curr_poses_x = poses_x[idx][0]
             curr_poses_y = poses_y[idx][0]
@@ -67,9 +67,11 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
 
 
         # Aggregate the datasets
+        print("Aggregating dataset...")
         dataset.add(data)
 
         # Train the agent
+        print("Training agent...")
         for _ in range(n_batch_updates_per_iter):
             train_batch = dataset.sample(train_batch_size)
             agent.train(train_batch["scans"], train_batch["actions"])
