@@ -21,7 +21,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
     init_traj_len = 50
     max_traj_len = 10000
     n_batch_updates_per_iter = 1000
-    n_iter = 10
+    n_iter = 500
 
     train_batch_size = 64
 

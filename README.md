@@ -51,7 +51,7 @@ cd examples
 
 Execute the example script
 ```bash
-python3 waypoint_follow.py
+python waypoint_follow.py
 ```
 
 ### Training
@@ -62,10 +62,10 @@ cd "imitation learning"
 
 Execute the training script
 ```bash
-python3 train.py --algorithm=<algorithm name> --training_config=<yaml file location>
+python train.py --algorithm=<algorithm name> --training_config=<yaml file location>
 ```
 
 Here is an example:
 ```bash
-python3 train.py --algorithm=dagger --training_config=il_config.yaml
+python train.py --algorithm=dagger --training_config=il_config.yaml
 ```
