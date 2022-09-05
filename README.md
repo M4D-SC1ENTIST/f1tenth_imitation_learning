@@ -43,17 +43,6 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-### Waypoint follow example
-Navigate to the examples folder
-```bash
-cd examples
-```
-
-Execute the example script
-```bash
-python waypoint_follow.py
-```
-
 ### Training
 Navigate to the imitation learning folder
 ```bash
@@ -65,7 +54,24 @@ Execute the training script
 python train.py --algorithm=<algorithm name> --training_config=<yaml file location>
 ```
 
-Here is an example:
+Example:
 ```bash
 python train.py --algorithm=dagger --training_config=il_config.yaml
+```
+
+
+### Inference
+Navigate to the imitation learning folder
+```bash
+cd "imitation learning"
+```
+
+Execute the inference script
+```bash
+python inference.py --training_config=<yaml file location> --model_path=<model path>
+```
+
+Example:
+```bash
+python inference.py --training_config=il_config.yaml --model_path=logs/DAgger/DAgger_model.pkl
 ```
