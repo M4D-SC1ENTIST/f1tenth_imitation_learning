@@ -9,6 +9,8 @@ import utils.env_utils as env_utils
 
 from dataset import Dataset
 
+from bc import bc
+
 def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
     algo_name = "HG-DAgger"
     best_model = agent
@@ -30,20 +32,8 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    dataset = Dataset()
-
-    log = {'Number of Samples': [], 
-           'Number of Expert Queries': [], 
-           'Mean Distance Travelled': [],
-           'STDEV Distance Travelled': [],
-           'Mean Reward': [],
-           'STDEV Reward': []}
-
-    rewards = []
-
     # Perform BC
-    for _ in range(init_traj_len):
-        pass
+    agent, log, dataset = bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode, purpose='bootstrap')
 
     # Perform HG-DAgger
     while True:

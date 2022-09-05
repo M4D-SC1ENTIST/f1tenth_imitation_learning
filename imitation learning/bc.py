@@ -151,7 +151,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
             agent.train(train_batch["scans"], train_batch["actions"])
         
         if purpose == "bootstrap":
-            return agent, log
+            return agent, log, dataset
 
     # Save log and the best model
     agent_utils.save_log_and_model(log, best_model, algo_name)
