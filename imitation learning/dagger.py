@@ -11,6 +11,7 @@ from dataset import Dataset
 def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
     algo_name = "DAgger"
     best_model = agent
+    longest_distance_travelled = 0
 
     num_of_expert_queries = 0
 
@@ -58,9 +59,8 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             log['STDEV Reward'].append(stdev_reward)
             
             # Replace the best model if the current model is better
-            if len(log['Mean Distance Travelled']) >= 2:
-                if log['Mean Distance Travelled'][-1] > log['Mean Distance Travelled'][-2]:
-                    best_model = agent
+            if log['Mean Distance Travelled'][-1] > longest_distance_travelled:
+                best_model = agent
 
             print("Number of Samples: {}".format(log['Number of Samples'][-1]))
             print("Number of Expert Queries: {}".format(log['Number of Expert Queries'][-1]))
