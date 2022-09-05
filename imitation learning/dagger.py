@@ -58,7 +58,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             log['STDEV Reward'].append(stdev_reward)
             
             # Replace the best model if the current model is better
-            if  len(log['Mean Distance Travelled']) >= 2:
+            if len(log['Mean Distance Travelled']) >= 2:
                 if log['Mean Distance Travelled'][-1] > log['Mean Distance Travelled'][-2]:
                     best_model = agent
 
@@ -68,6 +68,8 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             print("Reward: {} (+/- {})".format(log['Mean Reward'][-1], log['STDEV Reward'][-1]))
 
             print("- "*15)
+
+
         if iter == n_iter:
             break
 

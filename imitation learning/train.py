@@ -9,6 +9,7 @@ from policies.experts.expert_waypoint_follower import ExpertWaypointFollower
 
 import utils.env_utils as env_utils
 
+from bc import bc
 from dagger import dagger
 from hg_dagger import hg_dagger
 
@@ -80,8 +81,12 @@ def initialization(il_config):
     
 
 def train(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
-    if il_algo == 'dagger':
+    if il_algo == 'bc':
+        bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode, purpose='train')
+    elif il_algo == 'dagger':
         dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode)
+    elif il_algo == 'hg-dagger':
+        hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode)
     else:
         # TODO: Implement other IL algorithms (BC, HG DAgger, EIL, etc.)
         pass
