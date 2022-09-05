@@ -10,6 +10,8 @@ import utils.env_utils as env_utils
 from dataset import Dataset
 
 def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode, purpose):
+    best_model_saving_threshold = 500000
+
     algo_name = "Behavioral Cloning"
     best_model = agent
     longest_distance_travelled = 0
@@ -24,7 +26,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
     max_traj_len = 10000
 
     if purpose == "train":
-        n_iter = 2000
+        n_iter = 1600
     elif purpose == "bootstrap":
         n_iter = 1
     else:
@@ -53,7 +55,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
         if purpose == "train":
             print("-"*30 + ("\ninitial:" if iter == 0 else "\niter {}:".format(iter)))
         else:
-            print("-"*30 + "\nbootstrap using BC:")
+            print("- "*15 + "\nbootstrap using BC:")
         
 
         # Evaluate the agent's performance
@@ -69,7 +71,8 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
             log['STDEV Reward'].append(stdev_reward)
             
             # Replace the best model if the current model is better
-            if log['Mean Distance Travelled'][-1] > longest_distance_travelled:
+            if (log['Mean Distance Travelled'][-1] > longest_distance_travelled) and (log['Number of Samples'][-1] < best_model_saving_threshold):
+                longest_distance_travelled = log['Mean Distance Travelled'][-1]
                 best_model = agent
 
             print("Number of Samples: {}".format(log['Number of Samples'][-1]))
@@ -100,7 +103,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
         if purpose == "train":
             step_num = num_of_samples_increment
         else:
-            step_num = 100
+            step_num = 500
 
         for j in range(step_num):
             traj["observs"].append(obs)

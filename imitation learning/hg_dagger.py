@@ -12,6 +12,8 @@ from dataset import Dataset
 from bc import bc
 
 def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
+    best_model_saving_threshold = 500000
+
     algo_name = "HG-DAgger"
     best_model = agent
 
@@ -32,16 +34,25 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    # Perform BC
+    # Bootstrap using BC
     agent, log, dataset = bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode, purpose='bootstrap')
 
     # Perform HG-DAgger
-    while True:
-        done = False
-        observ, step_reward, done, info = env.reset(start_pose)
-        if render:
-            if env.renderer is None:
-                env.render()
+    max_num_of_epoch = 500
+    max_num_of_rollout = 5
 
-        for i in range(max_traj_len):
-            pass
+    for i in range(max_num_of_epoch):
+        print("-"*30 + ("\ninitial:" if iter == 0 else "\niter {}:".format(iter)))
+        for j in range(max_num_of_rollout):
+            # TODO: Evaluation
+
+            # Reset environment
+            done = False
+            observ, step_reward, done, info = env.reset(start_pose)
+            # Start rendering
+            if render:
+                if env.renderer is None:
+                    env.render()
+            for k in range(max_traj_len):
+                pass
+            
