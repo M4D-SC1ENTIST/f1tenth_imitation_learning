@@ -12,7 +12,7 @@ from dataset import Dataset
 def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode, purpose):
     best_model_saving_threshold = 500000
 
-    algo_name = "Behavioral Cloning"
+    algo_name = "BehavioralCloning"
     best_model = agent
     longest_distance_travelled = 0
 
