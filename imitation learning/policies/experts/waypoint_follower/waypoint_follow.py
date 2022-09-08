@@ -264,6 +264,9 @@ def main():
         speed, steer = planner.plan(obs['poses_x'][0], obs['poses_y'][0], obs['poses_theta'][0], work['tlad'], work['vgain'])
         obs, step_reward, done, info = env.step(np.array([[steer, speed]]))
 
+        # print("linear vels x: ", obs['linear_vels_x'][0])
+        # print("linear vels y: ", obs['linear_vels_y'][0])
+
         print("step_reward: ", step_reward)
 
         laptime += step_reward

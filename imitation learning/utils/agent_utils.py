@@ -144,3 +144,21 @@ def save_log_and_model(log, agent, algo_name):
     model_path.parent.mkdir(parents=True, exist_ok=True) 
     torch.save(agent.state_dict(), model_path)
 
+
+def check_ittc(ego_distance, linear_vels_x, ittc_threshold = 0.5, scan_num = 1080):
+    """
+    Checks the time to collision (TTC) of the agent based on the lidar scan.
+    """
+
+    angle_span = np.linspace(-0.75 * np.pi, 0.75 * np.pi, scan_num)
+    ego_speed_proj = np.cos(angle_span) * linear_vels_x
+    ego_speed_proj[ego_speed_proj <= 0.0] = 0.001
+    raw_ittc = ego_distance / ego_speed_proj
+    if np.min(raw_ittc) > ittc_threshold:
+        within_threshold = False
+        abs_ittc = 0.0
+    else:
+        within_threshold = True
+        abs_ittc = np.min(raw_ittc)
+    
+    return within_threshold, abs_ittc
