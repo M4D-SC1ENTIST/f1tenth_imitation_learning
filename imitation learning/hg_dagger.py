@@ -12,9 +12,7 @@ from dataset import Dataset
 from bc import bc
 
 def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
-    best_model_saving_threshold = 500000
-
-    algo_name = "HG-DAgger"
+    algo_name = "HGDAgger"
     best_model = agent
     longest_distance_travelled = 0
 
@@ -45,14 +43,12 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
            'STDEV Reward': []}
 
     # Perform HG-DAgger
-    n_iter = 70    # Number of Epochs
+    n_iter = 267    # Number of Epochs
 
     n_rollout = 5
 
     tlad = 0.82461887897713965
     vgain = 0.90338203837889
-
-    log_update_threshold = 500
 
     # Epochs
     for iter in range(n_iter + 1):
@@ -70,8 +66,8 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
             log['STDEV Reward'].append(stdev_reward)
             
             # Replace the best model if the current model is better
-            if (log['Mean Distance Travelled'][-1] > longest_distance_travelled) and (log['Number of Samples'][-1] < best_model_saving_threshold):
-                longest_distance_travelled = log['Mean Distance Travelled'][-1]
+            if (log['Mean Distance Travelled'][-1] > 170):
+                # longest_distance_travelled = log['Mean Distance Travelled'][-1]
                 best_model = agent
 
             print("Number of Samples: {}".format(log['Number of Samples'][-1]))
@@ -120,7 +116,7 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
 
 
                 # Decide if agent or expert has control
-                if (np.abs(curr_agent_steer - curr_expert_steer) > 0.03) or (np.abs(curr_agent_speed - curr_expert_speed) > 1):
+                if (np.abs(curr_agent_steer - curr_expert_steer) > 0.1) or (np.abs(curr_agent_speed - curr_expert_speed) > 1):
                     """
                     poses_x = observ["poses_x"][0]
                     poses_y = observ["poses_y"][0]
@@ -170,3 +166,5 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
             for _ in range(n_batch_updates_per_iter):
                 train_batch = dataset.sample(train_batch_size)
                 agent.train(train_batch["scans"], train_batch["actions"])
+    
+    agent_utils.save_log_and_model(log, best_model, algo_name)
