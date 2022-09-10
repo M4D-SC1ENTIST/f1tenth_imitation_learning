@@ -66,8 +66,8 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
             log['STDEV Reward'].append(stdev_reward)
             
             # Replace the best model if the current model is better
-            if (log['Mean Distance Travelled'][-1] > 170):
-                # longest_distance_travelled = log['Mean Distance Travelled'][-1]
+            if (log['Mean Distance Travelled'][-1] > longest_distance_travelled):
+                longest_distance_travelled = log['Mean Distance Travelled'][-1]
                 best_model = agent
 
             print("Number of Samples: {}".format(log['Number of Samples'][-1]))
