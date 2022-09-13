@@ -45,7 +45,7 @@ if __name__ == '__main__':
         #TODO: Implement other model (Transformer)
         pass
 
-    agent.load_state_dict(torch.load(model_path))
+    agent.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     
     observation_shape = il_config['policy_type']['agent']['observation_shape']
     downsampling_method = il_config['policy_type']['agent']['downsample_method']
