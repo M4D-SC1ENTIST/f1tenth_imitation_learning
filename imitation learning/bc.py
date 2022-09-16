@@ -81,9 +81,16 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
             print("Reward: {} (+/- {})".format(log['Mean Reward'][-1], log['STDEV Reward'][-1]))
 
             print("- "*15)
+
+            # DELETE IT WHEN DOING SIM2REAL
+            if log['Number of Samples'][-1] > 30000:
+                break
         
         if iter == n_iter:
             break
+
+        
+
 
         tlad = 0.82461887897713965
         vgain = 0.90338203837889

@@ -73,10 +73,15 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
 
             print("- "*15)
 
+            # DELETE IT WHEN DOING SIM2REAL
+            if log['Number of Samples'][-1] > 30000:
+                break
+
 
         if iter == n_iter:
             break
-
+        
+        
 
         # Sample a trajectory with the agent and re-lable actions with the expert
         

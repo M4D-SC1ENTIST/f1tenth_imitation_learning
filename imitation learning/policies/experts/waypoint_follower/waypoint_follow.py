@@ -213,6 +213,31 @@ class PurePursuitPlanner:
         speed, steering_angle = get_actuation(pose_theta, lookahead_point, position, lookahead_distance, self.wheelbase)
         speed = vgain * speed
 
+
+        # For levine2nd map
+        # Change top speed to 2m/s
+        # speed = speed * 0.25
+
+        # Change top speed to 3m/s
+        # speed = speed * 0.375
+
+        # Change top speed to 4m/s
+        # speed = speed * 0.5
+
+        # Change top speed to 6m/s
+        # speed = speed * 0.75
+
+        
+
+
+        # For sim
+        # Low speed
+        speed = speed * 0.75
+
+        # High speed
+        # speed = speed * 1.4
+
+
         return speed, steering_angle
 
 def main():
@@ -222,6 +247,7 @@ def main():
 
     work = {'mass': 3.463388126201571, 'lf': 0.15597534362552312, 'tlad': 0.82461887897713965, 'vgain': 0.90338203837889}
     
+    # with open('levine2nd_config.yaml') as file:
     with open('config_example_map.yaml') as file:
         conf_dict = yaml.load(file, Loader=yaml.FullLoader)
     conf = Namespace(**conf_dict)
@@ -260,20 +286,54 @@ def main():
     laptime = 0.0
     start = time.time()
 
+    avg_velocity = 0
+    action_count = 0
+
     while not done:
         speed, steer = planner.plan(obs['poses_x'][0], obs['poses_y'][0], obs['poses_theta'][0], work['tlad'], work['vgain'])
+        
+        
+
+        # For levine2nd map
+        # Change top speed to 2m/s
+        # speed = speed * 0.25
+
+        # Change top speed to 3m/s
+        # speed = speed * 0.375
+
+        # Change top speed to 4m/s
+        # speed = speed * 0.5
+
+        # Change top speed to 6m/s
+        # speed = speed * 0.75
+
+        
+
+
+        # For sim
+        # Low speed
+        # speed = speed * 0.75
+
+        # High speed
+        # speed = speed * 1.4
+        
+        
         obs, step_reward, done, info = env.step(np.array([[steer, speed]]))
 
         # print("linear vels x: ", obs['linear_vels_x'][0])
         # print("linear vels y: ", obs['linear_vels_y'][0])
 
-        print("step_reward: ", step_reward)
+        # print("step_reward: ", step_reward)
 
         laptime += step_reward
+
+        avg_velocity = (avg_velocity * action_count + speed) / (action_count + 1)
+        action_count += 1
         
         # Update rendering
-        env.render(mode='human')
-        
+        env.render(mode='human_fast')
+    
+    print('Average Speed: ', avg_velocity)
     print('Sim elapsed time:', laptime, 'Real elapsed time:', time.time()-start)
 
 if __name__ == '__main__':

@@ -222,7 +222,7 @@ def main():
 
     work = {'mass': 3.463388126201571, 'lf': 0.15597534362552312, 'tlad': 0.82461887897713965, 'vgain': 0.90338203837889}
     
-    with open('config_example_map.yaml') as file:
+    with open('levine2nd_config.yaml') as file:
         conf_dict = yaml.load(file, Loader=yaml.FullLoader)
     conf = Namespace(**conf_dict)
 
@@ -259,7 +259,20 @@ def main():
         speed, steer = planner.plan(obs['poses_x'][0], obs['poses_y'][0], obs['poses_theta'][0], work['tlad'], work['vgain'])
         
         print("Speed: ", speed)
-        print("Steer: ", steer)
+        # print("Steer: ", steer)
+
+        # For levine2nd map
+        # Change top speed to 2m/s
+        # speed = speed * 0.25
+
+        # Change top speed to 3m/s
+        speed = speed * 0.375
+
+        # Change top speed to 4m/s
+        # speed = speed * 0.5
+
+        # Change top speed to 6m/s
+        # speed = speed * 0.75
         
         obs, step_reward, done, info = env.step(np.array([[steer, speed]]))
         laptime += step_reward

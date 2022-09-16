@@ -90,9 +90,15 @@ def eil(seed, agent, expert, env, start_pose, observation_shape, downsampling_me
 
             print("- "*15)
 
+            # DELETE IT WHEN DOING SIM2REAL
+            if log['Number of Expert Queries'][-1] > 30000:
+                break
+
         
         if iter == n_iter:
             break
+
+        
 
         if iter == 0:
             # Bootstrap using BC
