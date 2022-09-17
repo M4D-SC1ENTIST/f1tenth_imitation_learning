@@ -17,6 +17,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
     longest_distance_travelled = 0
 
     resume_pose = start_pose
+    is_last_round_done = False
 
     if render:
         eval_batch_size = 1
@@ -26,7 +27,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
     max_traj_len = 10000
 
     if purpose == "train":
-        n_iter = 1600
+        n_iter = 100
     elif purpose == "bootstrap":
         n_iter = 1
     else:
@@ -133,10 +134,14 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
             traj["reward"] += step_reward
 
             if done:
+                is_last_round_done = True
                 break
         
         # To evenly sampling using expert by resuming at the last pose in the next iteration
-        resume_pose = np.array([[obs["poses_x"][0], obs["poses_y"][0], obs["poses_theta"][0]]])
+        if is_last_round_done:
+            resume_pose = start_pose
+        else:
+            resume_pose = np.array([[obs["poses_x"][0], obs["poses_y"][0], obs["poses_theta"][0]]])
         
         traj["observs"] = np.vstack(traj["observs"])
         traj["poses_x"] = np.vstack(traj["poses_x"])

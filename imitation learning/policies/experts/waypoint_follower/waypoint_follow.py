@@ -232,10 +232,10 @@ class PurePursuitPlanner:
 
         # For sim
         # Low speed
-        speed = speed * 0.75
+        # speed = speed * 0.75
 
         # High speed
-        # speed = speed * 1.4
+        speed = speed * 1.4
 
 
         return speed, steering_angle
