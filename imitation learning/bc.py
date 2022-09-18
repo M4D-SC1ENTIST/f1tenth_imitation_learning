@@ -39,7 +39,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
 
     train_batch_size = 64
 
-    np.random.seed(seed)
+    # np.random.seed(seed)
     torch.manual_seed(seed)
 
     dataset = Dataset()
@@ -84,7 +84,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
             print("- "*15)
 
             # DELETE IT WHEN DOING SIM2REAL
-            if log['Number of Samples'][-1] > 30000:
+            if log['Number of Samples'][-1] > 5000:
                 break
         
         if iter == n_iter:
@@ -116,6 +116,11 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
         for j in range(step_num):
             traj["observs"].append(obs)
             scan = agent_utils.downsample_and_extract_lidar(obs, observation_shape, downsampling_method)
+
+            # Add Sim2Real noise
+            sim2real_noise = np.random.uniform(-0.25, 0.25, scan.shape)
+            scan = scan + sim2real_noise
+
             traj["scans"].append(scan)
             traj["poses_x"].append(obs["poses_x"][0])
             traj["poses_y"].append(obs["poses_y"][0])

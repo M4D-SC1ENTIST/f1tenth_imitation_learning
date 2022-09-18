@@ -31,7 +31,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
 
     train_batch_size = 64
 
-    np.random.seed(seed)
+    # np.random.seed(seed)
     torch.manual_seed(seed)
 
     dataset = Dataset()
@@ -74,7 +74,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             print("- "*15)
 
             # DELETE IT WHEN DOING SIM2REAL
-            if log['Number of Samples'][-1] > 30000:
+            if log['Number of Samples'][-1] > 5000:
                 break
 
 

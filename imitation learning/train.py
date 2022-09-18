@@ -23,7 +23,7 @@ def process_parsed_args():
 
 def initialization(il_config):
     seed = il_config['random_seed']
-    np.random.seed(seed)
+    # np.random.seed(seed)
     torch.manual_seed(seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

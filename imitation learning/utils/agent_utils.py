@@ -41,6 +41,11 @@ def sample_traj(env, policy, start_pose, max_traj_len, observation_shape=108, do
         traj["observs"].append(observ)
         
         scan = downsample_and_extract_lidar(observ, observation_shape, downsampling_method)
+
+        # Add Sim2Real noise
+        sim2real_noise = np.random.uniform(-0.25, 0.25, scan.shape)
+        scan = scan + sim2real_noise
+
         traj["scans"].append(scan)
 
         traj["poses_x"].append(observ["poses_x"][0])

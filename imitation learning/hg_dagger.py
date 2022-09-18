@@ -24,13 +24,14 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
         eval_batch_size = 10
 
     init_traj_len = 50
-    max_traj_len = 3000
+    max_traj_len = 3500
     n_batch_updates_per_iter = 1000
     
+    eval_max_traj_len = 10000
 
     train_batch_size = 64
 
-    np.random.seed(seed)
+    # np.random.seed(seed)
     torch.manual_seed(seed)
 
     dataset = Dataset()
@@ -58,7 +59,7 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
             print("Evaluating agent...")
             print("- "*15)
             # log["Iteration"].append(iter)
-            mean_travelled_distances, stdev_travelled_distances, mean_reward, stdev_reward = agent_utils.eval(env, agent, start_pose, max_traj_len, eval_batch_size, observation_shape, downsampling_method, render, render_mode)
+            mean_travelled_distances, stdev_travelled_distances, mean_reward, stdev_reward = agent_utils.eval(env, agent, start_pose, eval_max_traj_len, eval_batch_size, observation_shape, downsampling_method, render, render_mode)
             
             log['Mean Distance Travelled'].append(mean_travelled_distances)
             log['STDEV Distance Travelled'].append(stdev_travelled_distances)
@@ -79,7 +80,7 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
 
 
             # DELETE IT WHEN DOING SIM2REAL
-            if log['Number of Samples'][-1] > 30000:
+            if log['Number of Expert Queries'][-1] > 5000:
                 break
 
 
@@ -105,6 +106,10 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
                 # Extract useful observations
                 raw_lidar_scan = observ["scans"][0]
                 downsampled_scan = agent_utils.downsample_and_extract_lidar(observ, observation_shape, downsampling_method)
+
+                # Add Sim2Real noise
+                sim2real_noise = np.random.uniform(-0.25, 0.25, downsampled_scan.shape)
+                downsampled_scan = downsampled_scan + sim2real_noise
 
                 linear_vels_x = observ["linear_vels_x"][0]
 
