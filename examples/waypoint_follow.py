@@ -258,7 +258,7 @@ def main():
     while not done:
         speed, steer = planner.plan(obs['poses_x'][0], obs['poses_y'][0], obs['poses_theta'][0], work['tlad'], work['vgain'])
         
-        print("Speed: ", speed)
+        # print("Speed: ", speed)
         # print("Steer: ", steer)
 
         # For levine2nd map
@@ -276,9 +276,11 @@ def main():
         
         obs, step_reward, done, info = env.step(np.array([[steer, speed]]))
         laptime += step_reward
-        env.render(mode='human')
+        env.render(mode='human_fast')
         
     print('Sim elapsed time:', laptime, 'Real elapsed time:', time.time()-start)
+    print('Lap Counts: ', env.lap_counts[0])
+    print('Lap Times: ', env.lap_times[0])
 
 if __name__ == '__main__':
     main()
