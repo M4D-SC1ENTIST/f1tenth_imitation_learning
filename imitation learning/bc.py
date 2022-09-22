@@ -9,12 +9,20 @@ import utils.env_utils as env_utils
 
 from dataset import Dataset
 
+from pathlib import Path
+
 def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode, purpose):
     best_model_saving_threshold = 500000
 
     algo_name = "BehavioralCloning"
     best_model = agent
     longest_distance_travelled = 0
+
+
+    # For Sim2Real
+    path = "logs/{}".format(algo_name)
+    num_of_saved_models = 0
+
 
     resume_pose = start_pose
     is_last_round_done = False
@@ -75,6 +83,14 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
             if (log['Mean Distance Travelled'][-1] > longest_distance_travelled) and (log['Number of Samples'][-1] < best_model_saving_threshold):
                 longest_distance_travelled = log['Mean Distance Travelled'][-1]
                 best_model = agent
+            
+            # For Sim2Real
+            if (log['Mean Distance Travelled'][-1] > 100):
+                curr_dist = log['Mean Distance Travelled'][-1]
+                model_path = Path(path + f'/{algo_name}_svidx_{str(num_of_saved_models)}_dist_{int(curr_dist)}.pkl')
+                model_path.parent.mkdir(parents=True, exist_ok=True) 
+                torch.save(agent.state_dict(), model_path)
+                num_of_saved_models += 1
 
             print("Number of Samples: {}".format(log['Number of Samples'][-1]))
             print("Number of Expert Queries: {}".format(log['Number of Expert Queries'][-1]))
@@ -84,7 +100,7 @@ def bc(seed, agent, expert, env, start_pose, observation_shape, downsampling_met
             print("- "*15)
 
             # DELETE IT WHEN DOING SIM2REAL
-            if log['Number of Samples'][-1] > 5000:
+            if log['Number of Samples'][-1] > 25000:
                 break
         
         if iter == n_iter:

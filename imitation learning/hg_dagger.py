@@ -80,7 +80,7 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
 
 
             # DELETE IT WHEN DOING SIM2REAL
-            if log['Number of Expert Queries'][-1] > 5000:
+            if log['Number of Expert Queries'][-1] > 3000:
                 break
 
 

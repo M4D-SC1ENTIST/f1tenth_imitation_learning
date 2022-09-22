@@ -222,7 +222,8 @@ def main():
 
     work = {'mass': 3.463388126201571, 'lf': 0.15597534362552312, 'tlad': 0.82461887897713965, 'vgain': 0.90338203837889}
     
-    with open('levine2nd_config.yaml') as file:
+    # with open('levine2nd_config.yaml') as file:
+    with open('config_example_map.yaml') as file:
         conf_dict = yaml.load(file, Loader=yaml.FullLoader)
     conf = Namespace(**conf_dict)
 
@@ -266,17 +267,26 @@ def main():
         # speed = speed * 0.25
 
         # Change top speed to 3m/s
-        speed = speed * 0.375
+        # speed = speed * 0.375
 
         # Change top speed to 4m/s
         # speed = speed * 0.5
 
         # Change top speed to 6m/s
         # speed = speed * 0.75
+
+        # Change speed to 8.24m/s
+        # speed = speed * 1.29
+
+        # Change speed to 4.79m/s
+        speed = speed * 0.7496
         
         obs, step_reward, done, info = env.step(np.array([[steer, speed]]))
         laptime += step_reward
         env.render(mode='human_fast')
+
+        if env.lap_counts[0] > 0:
+            break
         
     print('Sim elapsed time:', laptime, 'Real elapsed time:', time.time()-start)
     print('Lap Counts: ', env.lap_counts[0])

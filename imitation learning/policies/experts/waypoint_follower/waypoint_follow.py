@@ -219,10 +219,10 @@ class PurePursuitPlanner:
         # speed = speed * 0.25
 
         # Change top speed to 2.5m/s
-        # speed = speed * 0.3125
+        speed = speed * 0.3125
 
         # Change top speed to 3m/s
-        # speed = speed * 0.375
+        speed = speed * 0.375
 
         # Change top speed to 3.5m/s
         # speed = speed * 0.4375
@@ -237,7 +237,7 @@ class PurePursuitPlanner:
         # speed = speed * 0.625
 
         # Change top speed to 5.5m/s
-        speed = speed * 0.6875
+        # speed = speed * 0.6875
 
         # Change top speed to 6m/s
         # speed = speed * 0.75
@@ -253,7 +253,7 @@ class PurePursuitPlanner:
         # speed = speed * 0.75
 
         # High speed
-        # speed = speed * 1.4
+        # speed = speed * 1.25
 
 
         return speed, steering_angle

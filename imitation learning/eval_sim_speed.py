@@ -15,10 +15,10 @@ import utils.env_utils as env_utils
 from policies.agents.agent_mlp import AgentPolicyMLP
 
 
-# random_seed = 0
+random_seed = 1
 
-# np.random.seed(random_seed)
-# torch.manual_seed(random_seed)
+np.random.seed(random_seed)
+torch.manual_seed(random_seed)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 slow_bc_agent = AgentPolicyMLP(108, 128, 2, 0.001, device)
