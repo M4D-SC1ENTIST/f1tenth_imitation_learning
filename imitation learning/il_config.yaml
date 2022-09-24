@@ -10,7 +10,7 @@ environment:
 policy_type:
   agent: 
     downsample_method: simple
-    observation_shape: 1080
+    observation_shape: 108
     # TODO: downsample option for CNN and ViT
     model: mlp
     hidden_dim: 256

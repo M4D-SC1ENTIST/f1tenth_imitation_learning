@@ -79,7 +79,8 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             # For Sim2Real
             if (log['Mean Distance Travelled'][-1] > 100):
                 curr_dist = log['Mean Distance Travelled'][-1]
-                model_path = Path(path + f'/{algo_name}_svidx_{str(num_of_saved_models)}_dist_{int(curr_dist)}.pkl')
+                current_expsamples = log['Number of Expert Queries'][-1]
+                model_path = Path(path + f'/{algo_name}_svidx_{str(num_of_saved_models)}_dist_{int(curr_dist)}_expsamp_{int(current_expsamples)}.pkl')
                 model_path.parent.mkdir(parents=True, exist_ok=True) 
                 torch.save(agent.state_dict(), model_path)
                 num_of_saved_models += 1
@@ -94,7 +95,7 @@ def dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling
             print("- "*15)
 
             # DELETE IT WHEN DOING SIM2REAL
-            if log['Number of Samples'][-1] > 25000:
+            if log['Number of Samples'][-1] > 3000:
                 break
 
 

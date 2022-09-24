@@ -10,6 +10,7 @@ import utils.env_utils as env_utils
 from dataset import Dataset
 
 from bc import bc
+from pathlib import Path
 
 def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampling_method, render, render_mode):
     algo_name = "HGDAgger"
@@ -17,6 +18,10 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
     longest_distance_travelled = 0
 
     num_of_expert_queries = 0
+
+    # For Sim2Real
+    path = "logs/{}".format(algo_name)
+    num_of_saved_models = 0
 
     if render:
         eval_batch_size = 1
@@ -70,6 +75,18 @@ def hg_dagger(seed, agent, expert, env, start_pose, observation_shape, downsampl
             if (log['Mean Distance Travelled'][-1] > longest_distance_travelled):
                 longest_distance_travelled = log['Mean Distance Travelled'][-1]
                 best_model = agent
+
+
+            # For Sim2Real
+            if (log['Mean Distance Travelled'][-1] > 100):
+                curr_dist = log['Mean Distance Travelled'][-1]
+                current_expsamples = log['Number of Expert Queries'][-1]
+                model_path = Path(path + f'/{algo_name}_svidx_{str(num_of_saved_models)}_dist_{int(curr_dist)}_expsamp_{int(current_expsamples)}.pkl')
+                model_path.parent.mkdir(parents=True, exist_ok=True) 
+                torch.save(agent.state_dict(), model_path)
+                num_of_saved_models += 1
+
+        
 
             print("Number of Samples: {}".format(log['Number of Samples'][-1]))
             print("Number of Expert Queries: {}".format(log['Number of Expert Queries'][-1]))

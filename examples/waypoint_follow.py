@@ -211,7 +211,12 @@ class PurePursuitPlanner:
             return 4.0, 0.0
 
         speed, steering_angle = get_actuation(pose_theta, lookahead_point, position, lookahead_distance, self.wheelbase)
+        
+        # Nonlinear speed control
         speed = vgain * speed
+
+        # Linear speed
+        # speed = 3.0
 
         return speed, steering_angle
 

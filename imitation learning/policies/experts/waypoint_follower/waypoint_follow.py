@@ -219,10 +219,10 @@ class PurePursuitPlanner:
         # speed = speed * 0.25
 
         # Change top speed to 2.5m/s
-        speed = speed * 0.3125
+        # speed = speed * 0.3125
 
         # Change top speed to 3m/s
-        speed = speed * 0.375
+        # speed = speed * 0.375
 
         # Change top speed to 3.5m/s
         # speed = speed * 0.4375
