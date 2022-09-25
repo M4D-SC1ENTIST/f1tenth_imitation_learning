@@ -9,8 +9,7 @@ from policies.agents.agent_mlp import AgentPolicyMLP
 from policies.experts.expert_waypoint_follower import ExpertWaypointFollower
 import utils.env_utils as env_utils
 
-
-# max_step_num = 5000
+# max_step_num = 1000
 
 # Load agent model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -72,6 +71,7 @@ observ, step_reward, done, info = env.reset(start_pose)
 
 curr_idx = 0
 while not done:
+# for _ in range(max_step_num):
     # state_dict['idx'].append(i)
 
     poses_x = observ["poses_x"][0]
