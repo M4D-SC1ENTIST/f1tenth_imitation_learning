@@ -3,11 +3,44 @@ import numpy as np
 import yaml
 import argparse
 import gym
+import math
 
 from dictances import bhattacharyya, bhattacharyya_coefficient
 from policies.agents.agent_mlp import AgentPolicyMLP
 from policies.experts.expert_waypoint_follower import ExpertWaypointFollower
 import utils.env_utils as env_utils
+
+
+
+def mean( hist ):
+    mean = 0.0
+    for i in hist:
+        mean += i
+    mean/= len(hist)
+    return mean
+
+def bhatta ( hist1,  hist2):
+    # calculate mean of hist1
+    h1_ = mean(hist1)
+
+    # calculate mean of hist2
+    h2_ = mean(hist2)
+
+    # calculate score
+    score = 0
+    for i in range(8):
+        score += math.sqrt( np.abs(hist1[i] * hist2[i]) )
+    # print h1_,h2_,score;
+    # print("h1_:", h1_)
+    # print("h2_:", h2_)
+    # print("score:", score)
+    score = math.sqrt( np.abs(1 - ( 1 / math.sqrt(np.abs(h1_*h2_*8*8)) ) * score))
+    return score
+
+
+
+
+
 
 # max_step_num = 1000
 
@@ -37,7 +70,7 @@ eil_agent.load_state_dict(torch.load('logs/Sim Models for Bhattacharyya Dist Tes
 expert_steer_dict = {}
 
 
-
+expert_steer_list = []
 
 # bc_agent_speed_dict = {}
 
@@ -54,6 +87,13 @@ hgdagger_agent_steer_dict = {}
 # eil_agent_speed_dict = {}
 
 eil_agent_steer_dict = {}
+
+
+expert_steer_list = []
+bc_agent_steer_list = []
+dagger_agent_steer_list = []
+hgdagger_agent_steer_list = []
+eil_agent_steer_list = []
 
 with open('map/gene_eval_map/config_gene_map.yaml') as file:
     map_conf_dict = yaml.load(file, Loader=yaml.FullLoader)
@@ -72,7 +112,7 @@ observ, step_reward, done, info = env.reset(start_pose)
 curr_idx = 0
 while not done:
 # for _ in range(max_step_num):
-    # state_dict['idx'].append(i)
+    curr_idx += 1
 
     poses_x = observ["poses_x"][0]
     poses_y = observ["poses_y"][0]
@@ -88,38 +128,47 @@ while not done:
     # expert_steer_dict['idx'].append(curr_idx)
     # expert_steer_dict['steer'].append(curr_expert_steer)
     expert_steer_dict[str(curr_idx)] = curr_expert_steer
+    expert_steer_list.append(np.abs(curr_expert_steer))
 
     # Concat expert action
     expert_action = np.array([[curr_expert_steer, curr_expert_speed]])
 
     # Get agent action
-    bc_agent_speed, bc_agent_steer = bc_agent.get_action(scan)
+    bc_agent_action = bc_agent.get_action(scan)
+    bc_agent_steer, bc_agent_speed = float(bc_agent_action[0]), bc_agent_action[1]
     # bc_agent_speed_dict['idx'].append(curr_idx)
     # bc_agent_speed_dict['speed'].append(bc_agent_speed)
     # bc_agent_steer_dict['idx'].append(curr_idx)
     # bc_agent_steer_dict['steer'].append(bc_agent_steer)
-    bc_agent_steer_dict[str(curr_idx)] = bc_agent_steer
+    bc_agent_steer_dict[str(curr_idx)] = float(bc_agent_steer)
+    bc_agent_steer_list.append(float(bc_agent_steer))
 
-    dagger_agent_speed, dagger_agent_steer = dagger_agent.get_action(scan)
+    dagger_agent_action = dagger_agent.get_action(scan)
+    dagger_agent_steer, dagger_agent_speed = float(dagger_agent_action[0]), dagger_agent_action[1]
     # dagger_agent_speed_dict['idx'].append(curr_idx)
     # dagger_agent_speed_dict['speed'].append(dagger_agent_speed)
     # dagger_agent_steer_dict['idx'].append(curr_idx)
     # dagger_agent_steer_dict['steer'].append(dagger_agent_steer)
-    dagger_agent_steer_dict[str(curr_idx)] = dagger_agent_steer
+    dagger_agent_steer_dict[str(curr_idx)] = float(dagger_agent_steer)
+    dagger_agent_steer_list.append(float(dagger_agent_steer))
 
-    hgdagger_agent_speed, hgdagger_agent_steer = hgdagger_agent.get_action(scan)
+    hgdagger_agent_action = hgdagger_agent.get_action(scan)
+    hgdagger_agent_steer, hgdagger_agent_speed = float(hgdagger_agent_action[0]), hgdagger_agent_action[1]
     # hgdagger_agent_speed_dict['idx'].append(curr_idx)
     # hgdagger_agent_speed_dict['speed'].append(hgdagger_agent_speed)
     # hgdagger_agent_steer_dict['idx'].append(curr_idx)
     # hgdagger_agent_steer_dict['steer'].append(hgdagger_agent_steer)
-    hgdagger_agent_steer_dict[str(curr_idx)] = hgdagger_agent_steer
+    hgdagger_agent_steer_dict[str(curr_idx)] = float(hgdagger_agent_steer)
+    hgdagger_agent_steer_list.append(float(hgdagger_agent_steer))
 
-    eil_agent_speed, eil_agent_steer = eil_agent.get_action(scan)
+    eil_agent_action = eil_agent.get_action(scan)
+    eil_agent_steer, eil_agent_speed = float(eil_agent_action[0]), eil_agent_action[1]
     # eil_agent_speed_dict['idx'].append(curr_idx)
     # eil_agent_speed_dict['speed'].append(eil_agent_speed)
     # eil_agent_steer_dict['idx'].append(curr_idx)
     # eil_agent_steer_dict['steer'].append(eil_agent_steer)
-    eil_agent_steer_dict[str(curr_idx)] = eil_agent_steer
+    eil_agent_steer_dict[str(curr_idx)] = float(eil_agent_steer)
+    eil_agent_steer_list.append(float(eil_agent_steer))
 
 
 
@@ -133,15 +182,21 @@ while not done:
         break
 
 # Calculate bhattacharyya distance
+print(type(expert_steer_dict['1']))
+print(type(bc_agent_steer_dict['1']))
 
-bc_bhattacharyya = bhattacharyya(expert_steer_dict, bc_agent_steer_dict)
-dagger_bhattaryya = bhattacharyya(expert_steer_dict, dagger_agent_steer_dict)
-hgdagger_bhattacharyya = bhattacharyya(expert_steer_dict, hgdagger_agent_steer_dict)
-eil_bhattacharyya = bhattacharyya(expert_steer_dict, eil_agent_steer_dict)
+# bc_bhattacharyya = bhattacharyya(expert_steer_dict, bc_agent_steer_dict)
+# dagger_bhattaryya = bhattacharyya(expert_steer_dict, dagger_agent_steer_dict)
+# hgdagger_bhattacharyya = bhattacharyya(expert_steer_dict, hgdagger_agent_steer_dict)
+# eil_bhattacharyya = bhattacharyya(expert_steer_dict, eil_agent_steer_dict)
+
+bc_bhattacharyya = bhatta(expert_steer_list[300:350], bc_agent_steer_list[300:350])
+dagger_bhattaryya = bhatta(expert_steer_list[300:350], dagger_agent_steer_list[300:350])
+hgdagger_bhattacharyya = bhatta(expert_steer_list[300:350], hgdagger_agent_steer_list[300:350])
+eil_bhattacharyya = bhatta(expert_steer_list[300:350], eil_agent_steer_list[300:350])
 
 
 print('BC Bhattacharyya Metric: ', bc_bhattacharyya)
 print('Dagger Bhattacharyya Metric: ', dagger_bhattaryya)
 print('HG-Dagger Bhattacharyya Metric: ', hgdagger_bhattacharyya)
 print('EIL Bhattacharyya Metric: ', eil_bhattacharyya)
-                
